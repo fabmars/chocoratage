@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id "com.bmuschko.izpack" version "3.0"
+    id 'org.mikeneck.graalvm-native-image' version 'v1.0.0'
 }
 
 group 'fr.raluy'
@@ -78,5 +79,36 @@ izpack {
     appProperties = ['app.group': 'Chocoratage', 'app.name': 'chocoratage', 'app.title': 'Chocoratage',
                      'app.version': version, 'app.subpath': "Chocoratage-$version"]
      */
+}
+
+
+nativeImage {
+    graalVmHome = System.getProperty('java.home')
+    mainClass = 'fr.raluy.chocoratage.Main'
+    executableName = 'chocoratage-native'
+    outputDirectory = file("$buildDir/bin")
+    arguments {
+        add '--no-fallback'
+        add '--enable-all-security-services'
+        //add options.traceClassInitialization('com.example.MyDataProvider,com.example.MyDataConsumer')
+        //add '--initialize-at-run-time=com.example.runtime'
+        add '--report-unsupported-elements-at-runtime'
+    }
+}
+
+generateNativeImageConfig {
+    enabled = true
+    byRunningApplication {
+        stdIn("""
+    |total: 2
+    |contents:
+    |  - name: foo
+    |    size: 2052
+    |""".stripMargin())
+    }
+    byRunningApplicationWithoutArguments()
+    byRunningApplication {
+        arguments('-h')
+    }
 }
 
